@@ -32,6 +32,7 @@ import {
   stripMentions,
   hasKimakiBotPermission,
   hasNoKimakiRole,
+  isGuildAllowed,
 } from './discord-utils.js'
 import {
   getOpencodeSystemMessage,
@@ -265,6 +266,9 @@ export async function startDiscordBot({
 
   discordClient.on(Events.MessageCreate, async (message: Message) => {
     try {
+      if (!isGuildAllowed({ guildId: message.guildId })) {
+        return
+      }
       const isSelfBotMessage = Boolean(
         discordClient.user && message.author?.id === discordClient.user.id,
       )
@@ -841,6 +845,9 @@ export async function startDiscordBot({
   // Uses JSON embed marker to pass options (start, worktree name)
   discordClient.on(Events.ThreadCreate, async (thread, newlyCreated) => {
     try {
+      if (!isGuildAllowed({ guildId: thread.guildId })) {
+        return
+      }
       if (!newlyCreated) {
         return
       }
