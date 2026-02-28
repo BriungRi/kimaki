@@ -107,6 +107,7 @@ import * as errore from 'errore'
 import { createLogger, formatErrorWithStack, LogPrefix } from './logger.js'
 import { writeHeapSnapshot, startHeapMonitor } from './heap-monitor.js'
 import { startTaskRunner } from './task-runner.js'
+import { getDiscordApiBaseUrl } from './discord-api.js'
 import { setGlobalDispatcher, Agent } from 'undici'
 
 // Increase connection pool to prevent deadlock when multiple sessions have open SSE streams.
@@ -173,6 +174,7 @@ type StartOptions = {
 }
 
 export async function createDiscordClient() {
+  const apiBaseUrl = getDiscordApiBaseUrl()
   return new Client({
     intents: [
       GatewayIntentBits.Guilds,
@@ -186,6 +188,10 @@ export async function createDiscordClient() {
       Partials.User,
       Partials.ThreadMember,
     ],
+    rest: {
+      api: apiBaseUrl,
+      version: '10',
+    },
   })
 }
 

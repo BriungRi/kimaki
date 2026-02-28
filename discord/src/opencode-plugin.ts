@@ -34,6 +34,7 @@ import { REST, Routes } from 'discord.js'
 import * as errore from 'errore'
 import { getPrisma, createIpcRequest, getIpcRequestById } from './database.js'
 import { getBotToken } from './bot-token.js'
+import { createDiscordRest } from './discord-api.js'
 import { setDataDir } from './config.js'
 import { archiveThread, reactToThread } from './discord-utils.js'
 import { createLogger, formatErrorWithStack, LogPrefix, setLogFilePath } from './logger.js'
@@ -143,7 +144,7 @@ const kimakiPlugin: Plugin = async ({ directory }) => {
     return {}
   }
 
-  const rest = new REST().setToken(botToken)
+  const rest = createDiscordRest(botToken)
   const port = process.env.OPENCODE_PORT
   const client = port
     ? createOpencodeClient({

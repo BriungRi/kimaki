@@ -45,6 +45,7 @@ import {
   getSessionStartSourcesBySessionIds,
 } from './database.js'
 import { getBotToken, appIdFromToken } from './bot-token.js'
+import { createDiscordRest, getDiscordApiV10BaseUrl } from './discord-api.js'
 import { ShareMarkdown } from './markdown.js'
 import {
   parseSessionSearchPattern,
@@ -164,6 +165,7 @@ async function sendDiscordMessageWithOptionalAttachment({
   rest: REST
 }): Promise<{ id: string }> {
   const discordMaxLength = 2000
+  const apiV10BaseUrl = getDiscordApiV10BaseUrl()
   if (prompt.length <= discordMaxLength) {
     return (await rest.post(Routes.channelMessages(channelId), {
       body: { content: prompt, embeds },
@@ -198,7 +200,7 @@ async function sendDiscordMessageWithOptionalAttachment({
     )
 
     const starterMessageResponse = await fetch(
-      `https://discord.com/api/v10/channels/${channelId}/messages`,
+      `${apiV10BaseUrl}/channels/${channelId}/messages`,
       {
         method: 'POST',
         headers: {
@@ -833,7 +835,7 @@ async function registerCommands({
     )
   }
 
-  const rest = new REST().setToken(token)
+  const rest = createDiscordRest(token)
 
   try {
     const data = (await rest.put(Routes.applicationCommands(appId), {
@@ -2097,7 +2099,7 @@ cli
           }
         }
 
-        const rest = new REST().setToken(botToken)
+        const rest = createDiscordRest(botToken)
 
         if (existingThreadMode) {
           const targetThreadId = await (async (): Promise<string> => {
@@ -2704,7 +2706,7 @@ cli
 
     // Fetch Discord channel names via REST API
     const botRow = getBotToken({ preferEnv: false })
-    const rest = botRow ? new REST().setToken(botRow.token) : null
+    const rest = botRow ? createDiscordRest(botRow.token) : null
 
     const enriched = await Promise.all(
       channels.map(async (ch) => {
@@ -2808,7 +2810,7 @@ cli
     }
 
     // Fetch channel from Discord to get guild_id
-    const rest = new REST().setToken(botToken)
+    const rest = createDiscordRest(botToken)
     const channelData = (await rest.get(
       Routes.channel(existingChannel.channel_id),
     )) as {
@@ -3390,7 +3392,7 @@ cli
 
       const { token: botToken } = await resolveBotCredentials()
 
-      const rest = new REST().setToken(botToken)
+      const rest = createDiscordRest(botToken)
       const threadData = (await rest.get(Routes.channel(threadId))) as {
         id: string
         type: number

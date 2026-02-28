@@ -21,6 +21,7 @@ import {
   getPromptPreview,
   parseScheduledTaskPayload,
 } from './task-schedule.js'
+import { createDiscordRest } from './discord-api.js'
 
 const taskLogger = createLogger(LogPrefix.TASK)
 
@@ -371,7 +372,7 @@ export function startTaskRunner({
   staleRunningMs = 120_000,
   dueBatchSize = 20,
 }: StartTaskRunnerOptions): () => Promise<void> {
-  const rest = new REST().setToken(token)
+  const rest = createDiscordRest(token)
   let stopped = false
   let ticking = false
   let tickPromise: Promise<void> | null = null
