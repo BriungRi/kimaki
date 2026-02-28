@@ -4,6 +4,7 @@
 
 import { getPrisma, closePrisma } from './db.js'
 import { getDefaultVerbosity, getDefaultMentionMode } from './config.js'
+import { hydrateBotTokenCache } from './bot-token.js'
 import { createLogger, LogPrefix } from './logger.js'
 
 const dbLogger = createLogger(LogPrefix.DB)
@@ -17,6 +18,12 @@ export { getPrisma, closePrisma }
  */
 export async function initDatabase() {
   const prisma = await getPrisma()
+  const botRow = await prisma.bot_tokens.findFirst({
+    orderBy: { created_at: 'desc' },
+  })
+  hydrateBotTokenCache(
+    botRow ? { app_id: botRow.app_id, token: botRow.token } : null,
+  )
   dbLogger.log('Database initialized')
   return prisma
 }
@@ -1065,22 +1072,6 @@ export async function setPartMessagesBatch(
 // ============================================================================
 
 /**
- * Get the most recent bot token.
- */
-export async function getBotToken(): Promise<
-  { app_id: string; token: string } | undefined
-> {
-  const prisma = await getPrisma()
-  const row = await prisma.bot_tokens.findFirst({
-    orderBy: { created_at: 'desc' },
-  })
-  if (!row) {
-    return undefined
-  }
-  return { app_id: row.app_id, token: row.token }
-}
-
-/**
  * Store a bot token.
  */
 export async function setBotToken(appId: string, token: string): Promise<void> {
@@ -1090,6 +1081,7 @@ export async function setBotToken(appId: string, token: string): Promise<void> {
     create: { app_id: appId, token },
     update: { token },
   })
+  hydrateBotTokenCache({ app_id: appId, token })
 }
 
 // ============================================================================

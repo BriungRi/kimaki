@@ -33,6 +33,7 @@ import { createOpencodeClient } from '@opencode-ai/sdk/v2'
 import { REST, Routes } from 'discord.js'
 import * as errore from 'errore'
 import { getPrisma, createIpcRequest, getIpcRequestById } from './database.js'
+import { getBotToken } from './bot-token.js'
 import { setDataDir } from './config.js'
 import { archiveThread, reactToThread } from './discord-utils.js'
 import { createLogger, formatErrorWithStack, LogPrefix, setLogFilePath } from './logger.js'
@@ -130,7 +131,7 @@ const kimakiPlugin: Plugin = async ({ directory }) => {
   // Initialize Sentry in the plugin process (runs inside OpenCode server, not bot)
   initSentry()
 
-  const botToken = process.env.KIMAKI_BOT_TOKEN
+  const botToken = getBotToken({ allowDatabase: false })?.token
   const dataDir = process.env.KIMAKI_DATA_DIR
   if (dataDir) {
     setDataDir(dataDir)
