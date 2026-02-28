@@ -4,7 +4,7 @@
 
 import { getPrisma, closePrisma } from './db.js'
 import { getDefaultVerbosity, getDefaultMentionMode } from './config.js'
-import { hydrateBotTokenCache } from './bot-token.js'
+import { hydrateBotTokenCache, isAuthModeEnabled } from './bot-token.js'
 import { createLogger, LogPrefix } from './logger.js'
 
 const dbLogger = createLogger(LogPrefix.DB)
@@ -1075,6 +1075,9 @@ export async function setPartMessagesBatch(
  * Store a bot token.
  */
 export async function setBotToken(appId: string, token: string): Promise<void> {
+  if (isAuthModeEnabled()) {
+    return
+  }
   const prisma = await getPrisma()
   await prisma.bot_tokens.upsert({
     where: { app_id: appId },
