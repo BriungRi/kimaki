@@ -15,10 +15,10 @@ import {
 } from 'discord.js'
 import { REST, Routes } from 'discord.js'
 import type { OpencodeClient } from '@opencode-ai/sdk/v2'
-import { discordApiUrl } from './discord-urls.js'
 import { Lexer } from 'marked'
 import { splitTablesFromMarkdown } from './format-tables.js'
 import { getChannelDirectory, getThreadWorktree } from './database.js'
+import { getDiscordApiV10BaseUrl } from './discord-api.js'
 import { limitHeadingDepth } from './limit-heading-depth.js'
 import { unnestCodeBlocksFromLists } from './unnest-code-blocks.js'
 import { createLogger, LogPrefix } from './logger.js'
@@ -712,6 +712,7 @@ export async function uploadFilesToDiscord({
   if (files.length === 0) {
     return
   }
+  const apiV10BaseUrl = getDiscordApiV10BaseUrl()
 
   // Build attachments array for all files
   const attachments = files.map((file, index) => ({
@@ -734,7 +735,7 @@ export async function uploadFilesToDiscord({
   })
 
   const response = await fetch(
-    discordApiUrl(`/channels/${threadId}/messages`),
+    `${apiV10BaseUrl}/channels/${threadId}/messages`,
     {
       method: 'POST',
       headers: {

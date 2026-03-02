@@ -1,7 +1,6 @@
 // Scheduled task runner for executing due `send --send-at` jobs in the bot process.
 
 import { type REST, Routes } from 'discord.js'
-import { createDiscordRest } from './discord-urls.js'
 import yaml from 'js-yaml'
 import {
   claimScheduledTaskRunning,
@@ -22,6 +21,7 @@ import {
   getPromptPreview,
   parseScheduledTaskPayload,
 } from './task-schedule.js'
+import { createDiscordRest } from './discord-api.js'
 
 const taskLogger = createLogger(LogPrefix.TASK)
 
